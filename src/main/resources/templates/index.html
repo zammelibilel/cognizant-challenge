@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<title>JPay Execise</title>
+	<script src="/jquery-3.3.1.min.js"></script>
+	<link th:href="@{datatables.css}" rel="stylesheet">
+	<link th:href="@{bootstrap.min.css}" rel="stylesheet">
+	<link th:href="@{style.css}" rel="stylesheet">
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="row">
+        <div class="tabs">
+			<div class="row" style="display: flex;background-color: deepskyblue;align-items: center;">
+				<div class="col col-md-6" style="font-size: x-large;color: whitesmoke;">COGNIZANT CHALLENGE</div>
+				<ul class="title col col-md-6" id="tabs-nav">
+					<li class=""><a href="#tab2">Top 3</a></li>
+					<li class="active"><a href="#tab1">Solve</a></li>
+				</ul> <!-- END tabs-nav -->
+				</div>
+			</div>
+
+            <div id="tabs-content">
+			    <div id="tab1" class="tab-content">
+			     
+				 
+					<div style="min-height: 470px">
+					
+					<form id="test-form" method="post" class="card p-3 mb-5">
+						<div class="row">					
+						   <div class="col col-md-3">	 
+								<div class="form-group">
+									<label for="player">Player</label>
+									<input id="player" placeholder="Enter Your Name" required="" type="text" class="form-control">
+								</div>
+								<div class="form-group">
+									<label for="task">Task</label>
+									<select id="task" required="" class="form-control ">
+									</select>
+								</div>
+								<div class="form-group">
+									<label for="ta">Description</label>
+									<div id="description"><p>...  ...</p></div>
+								</div>
+								<div class="form-group">
+									<label for="stdin">StdIn</label>
+									<input id="stdin" placeholder="Enter Your Input value" required="" type="text" class="form-control">
+								</div>
+							</div>
+							<div class="col col-md-9">
+								<div class="form-group">
+									<label for="ta">Solution</label>
+									<textarea id="solution" placeholder="Enter Your Solution" required="" type="text" style="height: 413px;" class="form-control">
+import java.util.*;
+public class ReadDataFromScanner {
+   public static void main (String[] args) {
+
+      Scanner scanner = new Scanner(System.in);
+      String yourInputSrtring = scanner.nextLine();
+
+   }
+}</textarea>
+								</div>
+							</div>
+						</div>
+						<div class="row">					
+						   <div class="col col-md-4">
+								<input id="btn-execute" class="btn btn-primary" style="margin-bottom: 1em!important;" value="Execute">
+								<input id="btn-commit" class="btn btn-primary" value="Commit">
+							</div>
+							<div class="col col-md-6">
+								<div class="panel panel-default">
+								  <div class="panel-heading">Result</div>
+								  <div id="result" class="panel-body">
+								  </div>
+								</div>
+							</div>
+						</div>
+					</form>
+					
+					</div>
+			    
+			    </div>
+			    
+			    
+			    
+			    
+			    <div id="tab2" class="tab-content">
+			      <h2>Tab 2</h2>
+
+					<table class="datatable table table-striped table-bordered">
+						<thead>
+							<tr>
+								<th style="width: 20%">Name</th>
+								<th style="width: 20%">SUCCESS SOLUTIONS</th>
+								<th style="width: 60%">TASKS</th>
+							</tr>
+						</thead>
+						<tbody class="player-table">
+							<!-- auto filled in -->
+						</tbody>
+					</table>
+
+
+			    </div>
+			  </div>
+        </div>
+    </div>
+
+</div>
+
+
+<script>
+	
+	$(document).ready(function () { 
+
+		// Show the first tab and hide the rest
+		$('#tabs-nav li:first-child').addClass('active');
+		$('.tab-content').hide();
+		$('.tab-content:first').show();
+
+
+	
+       $.ajax({  
+           type: "GET",  
+           url: "/game/tasks",    
+           success: function (data) {  
+               var s = '<option value="">Please Select a Task</option>';  
+               for (var i = 0; i < data.length; i++) {  
+                   s += '<option value="' + data[i].id + '" data-description="' + data[i].description + '">' + data[i].name + '</option>';  
+               }  
+               $("#task").html(s);  
+           }  
+       });
+	   
+	}); 
+	
+	$('#task').on('change', function () { 
+		console.log($(this).find(':selected'));
+		$("#description").last().html($(this).find(':selected').data('description'));
+	});
+    
+	$('#btn-execute').on('click', function () { 	
+        fire_ajax_submit('execute');
+    });
+	
+	$('#btn-commit').on('click', function () { 	
+        fire_ajax_submit('commit');
+    });
+	
+	
+	function fire_ajax_submit(action) {
+
+		var testInputRequest = {}
+		testInputRequest["player"] = $("#player").val();
+		testInputRequest["taskId"] = $("#task").val();
+		testInputRequest["solution"] = $("#solution").val();
+		testInputRequest["stdin"] = $("#stdin").val();
+		
+
+		$("#btn-execute").prop("disabled", true);
+		$("#btn-commit").prop("disabled", true);
+
+		if(action == 'execute') {
+			url = "/game/execute";
+		} else if(action == 'commit') {
+			url = "/game/commit";
+		}
+		
+		$.ajax({
+			type: "POST",
+			contentType: "application/json",
+			url: url,
+			data: JSON.stringify(testInputRequest),
+			dataType: 'json',
+			cache: false,
+			timeout: 600000,
+			success: function (data) {
+
+				if(action == 'execute') {
+					
+					$('#result').html(data.output);
+				
+				} else if(action == 'commit') {
+				}
+				
+
+				console.log("SUCCESS : ", data);
+				
+				
+				$("#btn-execute").prop("disabled", false);
+				$("#btn-commit").prop("disabled", false);
+
+			},
+			error: function (e) {
+
+				console.log("ERROR : ", e);
+				$("#btn-execute").prop("disabled", false);
+				$("#btn-commit").prop("disabled", false);
+
+			}
+		});
+
+	}
+	
+	
+    
+	
+	// Click function
+	$('#tabs-nav li').click(function(){
+	  $('#tabs-nav li').removeClass('active');
+	  $(this).addClass('active');
+	  $('.tab-content').hide();
+	  
+	  if($(this).is(':first-child')) {
+		loadTopPlayers();
+	  }
+	  
+	  var activeTab = $(this).find('a').attr('href');
+	  $(activeTab).fadeIn();
+	  return false;
+	});
+	
+	function loadTopPlayers() {						
+		var url = '/game/players';
+	
+		$.get(url, {}, function(items) {
+			var tableElem = $('.player-table');
+			tableElem.html('');
+			
+			$.each(items, function(key, item) {
+				tableElem.append('<tr>' 
+						+ '<td>' + item.player + '</td>'
+						+ '<td>' + item.totalSuccessTests + '</td>' 
+						+ '<td>' + item.tasks + '</td>'
+						+ '</tr>');
+			});
+		});
+	}
+	
+</script>
+
+</body>
+</html>

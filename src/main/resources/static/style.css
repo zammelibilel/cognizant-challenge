@@ -1,0 +1,41 @@
+/* Tabs */
+.tabs {
+
+}
+ul#tabs-nav {
+  list-style: none;
+  padding: 20px;
+  overflow: auto;
+}
+ul#tabs-nav li {
+  float: right;
+  font-weight: bold;
+  margin-right: 2px;
+  padding: 8px 10px;
+  border: 1px solid #d5d5de;
+ /* border-bottom: none;*/
+  cursor: pointer;
+}
+ul#tabs-nav li:hover,
+ul#tabs-nav li.active {
+  background-color: #edededa8;
+}
+#tabs-nav li a {
+  text-decoration: none;
+  color: #FFF;
+}
+.tab-content {
+  padding: 10px;
+  background-color: #FFF;
+}
+
+/* Just for CodePen styling - don't include if you copy paste */
+html {
+  margin: 0;
+  padding: 0;
+}
+body { 
+  font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif; 
+  font-weight: 300;
+  margin: 2em;
+}
