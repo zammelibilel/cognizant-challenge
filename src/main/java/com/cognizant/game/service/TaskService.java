@@ -12,6 +12,7 @@ import com.cognizant.game.dto.ExecuteRequest;
 import com.cognizant.game.dto.ExecuteResponse;
 import com.cognizant.game.dto.TestRequest;
 import com.cognizant.game.model.Task;
+import com.cognizant.game.model.TestCase;
 import com.cognizant.game.model.TestResult;
 import com.cognizant.game.repository.TaskRepository;
 import com.cognizant.game.repository.TestResultRepository;
@@ -35,7 +36,7 @@ public class TaskService {
 	}
 
 	public Boolean executeAndCommitTest(TestRequest request) {
-		Boolean result = false;
+		Boolean result = true;
 
 		Task task = taskRepository.getById(request.getTaskId());
 
@@ -45,38 +46,50 @@ public class TaskService {
 			testInput.setLanguage("java");
 			testInput.setVersionIndex("0");
 			testInput.setScript(request.getSolution());
-			testInput.setStdin(task.getInput());
 
-			try {
+			int i = 0;
 
-				// 1 - call the doodle api to execute the script
-				ExecuteResponse response = jdoodleClient.executeTest(testInput);
+			while (i < task.getTestCases().size() && result) {
 
-				if (response != null) {
+				TestCase testCase =  task.getTestCases().get(i);
 
-					// 2 - check/compare api result with the existing task output
+				try {
 
-					String resultOutput = response.getOutput().replace("\n", "");
-					if (resultOutput.equals(task.getOutput())) {
-						result = true;
-					} else {
-						logger.warn("> Wrong result [Task: {}, Output: {}]", task.getName(), response.getOutput());
+					testInput.setStdin(testCase.getInput());
+
+					// 1 - call the doodle api to execute the script
+					ExecuteResponse response = jdoodleClient.executeTest(testInput);
+
+					if (response != null) {
+
+						// 2 - check/compare api result with the existing task output
+
+						String resultOutput = response.getOutput().replace("\n", "");
+						if (!resultOutput.equals(testCase.getOutput())) {
+							result = false;
+						}
+
 					}
 
-					// 3 - save test result
-					TestResult testResult = new TestResult();
-					testResult.setPlayer(request.getPlayer());
-					testResult.setResult(result ? TestResultTypeEnum.SUCCESS : TestResultTypeEnum.FAILED);
-					testResult.setTask(task);
+				} catch (Exception e) {
+					logger.error("> Error when executing script using doodle API [Script: {}, Language: {}]",
+							testInput.getScript(), testInput.getLanguage(), e);
 
-					testResultRepository.save(testResult);
+					result = false;
 
 				}
+				
+				i++;
 
-			} catch (Exception e) {
-				logger.error("> Error when executing script using doodle API [Script: {}, Language: {}]",
-						testInput.getScript(), testInput.getLanguage(), e);
 			}
+
+			// 3 - save test result
+			TestResult testResult = new TestResult();
+			testResult.setPlayer(request.getPlayer());
+			testResult.setResult(result ? TestResultTypeEnum.SUCCESS : TestResultTypeEnum.FAILED);
+			testResult.setTask(task);
+
+			testResultRepository.save(testResult);
 
 		}
 

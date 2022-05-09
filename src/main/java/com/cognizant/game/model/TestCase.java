@@ -1,16 +1,16 @@
 package com.cognizant.game.model;
 
 import java.io.Serializable;
-import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import lombok.AllArgsConstructor;
@@ -26,8 +26,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 @Entity
-@Table(name = "TASK")
-public class Task implements Serializable {
+@Table(name = "TEST_CASE")
+public class TestCase implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -35,21 +35,14 @@ public class Task implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
-	@Column(name = "TASK_NAME")
-	private String name;
-	
-	@Column(name = "DESCRIPTION")
-	private String description;
-	
-	@OneToMany(orphanRemoval = true, cascade = CascadeType.ALL)
+	@OneToOne(orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JoinColumn(name = "TASK_ID")
-	private List<TestCase> testCases;
+	private Task task;
 
-	public Task(Long id, String name, String description) {
-		super();
-		this.id = id;
-		this.name = name;
-		this.description = description;
-	}
+	@Column(name = "INPUT")
+	private String input;
+	
+	@Column(name = "OUTPUT")
+	private String output;
 
 }

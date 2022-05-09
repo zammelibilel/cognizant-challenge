@@ -9,10 +9,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -50,9 +48,9 @@ class GameControllerTest {
 
         // mock the task repository to provide a list of 3 tasks.
        List<Task>  taskList = new ArrayList<>();
-        taskList.add(new Task(1L, "task1", "desc t1", "true", "true"));
-        taskList.add(new Task(1L, "task2", "desc t2", "true", "true"));
-        taskList.add(new Task(1L, "task2", "desc t3", "true", "true"));
+        taskList.add(new Task(1L, "task1", "desc t1"));
+        taskList.add(new Task(1L, "task2", "desc t2"));
+        taskList.add(new Task(1L, "task2", "desc t3"));
 
         Mockito.when(taskServiceMock.getTasks()).thenReturn(taskList);
         
